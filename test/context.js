@@ -119,4 +119,21 @@ test('dustjs-onload-context', function (t) {
     });
 
 
+    t.test('error', function (t) {
+        var undo = contextify();
+
+        dust.silenceErrors = true;
+        dust.onLoad = function (name, context, cb) {
+            console.log('load');
+            cb(new Error('test'));
+        };
+
+        dust.render('index', { name: 'world' }, function (err, data) {
+            undo();
+            t.ok(err);
+            t.equal(data, undefined);
+            t.end();
+        });
+    });
+
 });
