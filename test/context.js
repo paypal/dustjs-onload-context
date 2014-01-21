@@ -97,7 +97,7 @@ test('dustjs-onload-context', function (t) {
             t.equals(context.get('name'), 'world');
             t.equals(typeof cb, 'function');
 
-            dust.loadSource(dust.compile("Hello, {name}!", "index"));
+            dust.loadSource(dust.compile('Hello, {name}!', 'index'));
             cb(null);
         };
 
@@ -113,6 +113,7 @@ test('dustjs-onload-context', function (t) {
             t.equal(dust.load.name, '');
             t.end();
         });
+
     });
 
 
@@ -127,14 +128,14 @@ test('dustjs-onload-context', function (t) {
             t.equals(context.get('name'), 'world');
             t.equals(typeof cb, 'function');
 
-            dust.loadSource(dust.compile("Hello, {name}!", "index"));
+            dust.loadSource(dust.compile('Hello, {name}!', 'index'));
             cb(null);
         };
 
         dust.render('index', { name: 'world' }, function (err, data) {
             t.error(err);
             t.equal(data, 'Hello, world!');
-            t.equal(typeof dust.cache.index, "undefined");
+            t.equal(typeof dust.cache.index, 'undefined');
             t.equal(dust.load.name, 'cabbage');
 
             dust.cache = {};
@@ -143,13 +144,14 @@ test('dustjs-onload-context', function (t) {
             t.equal(dust.load.name, '');
             t.end();
         });
+
     });
 
 
     t.test('error', function (t) {
         var undo = contextify();
 
-        t.plan(5);
+        t.plan(7);
 
         dust.silenceErrors = true;
         dust.onLoad = function (name, context, cb) {
@@ -162,12 +164,15 @@ test('dustjs-onload-context', function (t) {
         dust.render('index', { name: 'world' }, function (err, data) {
             t.ok(err);
             t.equal(data, undefined);
+            t.equal(dust.load.name, 'cabbage');
 
             dust.cache = {};
             undo();
 
+            t.equal(dust.load.name, '');
             t.end();
         });
+
     });
 
 
@@ -180,7 +185,7 @@ test('dustjs-onload-context', function (t) {
             cb(new Error('Should not be called'));
         };
 
-        dust.loadSource(dust.compile("Hello, {name}!", "index"));
+        dust.loadSource(dust.compile('Hello, {name}!', 'index'));
         dust.render('index', { name: 'world' }, function (err, data) {
             t.error(err);
             t.equal(data, 'Hello, world!');
@@ -190,6 +195,46 @@ test('dustjs-onload-context', function (t) {
 
             t.end();
         });
+
+    });
+
+
+    t.test('undo', function (t) {
+        var undo = contextify();
+
+        t.plan(7);
+
+        dust.onLoad = function (name, context, cb) {
+            switch (name) {
+                case 'index':
+                    setImmediate(cb.bind(null, null, 'Hello, {>"partial"/}!'));
+                    undo();
+                    break;
+                case 'partial':
+                    setImmediate(cb.bind(null, null, '{name}'));
+                    break;
+            }
+        };
+
+        dust.render('index', { name: 'world'}, function (err, data) {
+            t.error(err);
+            t.equal(data, 'Hello, world!');
+            t.equal(dust.load.name, 'cabbage');
+        });
+
+        dust.render('index', { name: 'world'}, function (err, data) {
+            t.error(err);
+            t.equal(data, 'Hello, world!');
+            t.equal(dust.load.name, 'cabbage');
+
+            dust.cache = {};
+
+            setImmediate(function () {
+                t.equal(dust.load.name, '');
+                t.end();
+            });
+        });
+
     });
 
 });

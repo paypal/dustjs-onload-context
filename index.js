@@ -85,10 +85,15 @@ module.exports = function contextualize(options) {
     dustjs.load = patch(load, options);
 
     return function undo() {
+        if (dustjs.load === load) {
+            return;
+        }
+
         if (!active) {
             dustjs.load = load;
             return;
         }
+
         setImmediate(undo);
     };
 };
