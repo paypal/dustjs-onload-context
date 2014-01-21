@@ -1,4 +1,4 @@
-`dustjs-onload-context` extends `dustjs` to support passing rendering context to `dust.onLoad` callbacks.
+*dustjs-onload-context* extends *dustjs* to support passing rendering context to `dust.onLoad` callbacks.
 
 #### Basic Usage
 ```javascript
