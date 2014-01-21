@@ -1,0 +1,19 @@
+{
+  "name": "dustjs-onload-context",
+  "version": "0.0.0",
+  "description": "Extend dustjs onLoad to accept rendering context",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "npm test"
+  },
+  "keywords": [
+    "dustjs",
+    "context",
+    "onload"
+  ],
+  "author": "Erik Toth <ertoth@paypal.com>",
+  "license": "MIT"
+}
