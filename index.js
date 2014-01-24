@@ -102,11 +102,7 @@ module.exports = function contextualize(options) {
     }
 
     return function undo() {
-        if (dustjs.load === orig) {
-            return;
-        }
-
-        if (!active) {
+        if (!active && dustjs.load !== orig) {
             dustjs.load = orig;
             orig = undefined;
         }
