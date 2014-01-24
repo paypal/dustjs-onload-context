@@ -1,6 +1,6 @@
 {
   "name": "dustjs-onload-context",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Extend dustjs onLoad to accept rendering context",
   "main": "index.js",
   "directories": {
@@ -16,8 +16,18 @@
     "context",
     "onload"
   ],
+  "repository": "https://github.com/paypal/dustjs-onload-context.git",
   "author": "Erik Toth <ertoth@paypal.com>",
-  "license": "MIT",
+  "licenses": [
+    {
+      "type": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  ],
+  "engines": {
+    "node": ">=0.10.12"
+  },
+  "engineStrict": true,
   "devDependencies": {
     "tape": "~2.3.2",
     "jshint": "~2.4.2",

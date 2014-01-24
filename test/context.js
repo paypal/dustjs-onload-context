@@ -8,6 +8,33 @@ var test = require('tape'),
 
 test('dustjs-onload-context', function (t) {
 
+    function run(iterations, fn, complete) {
+        var awaiting = 0;
+
+        (function go() {
+
+            awaiting += 1;
+            fn(function () {
+                awaiting -= 1;
+                if (!iterations && !awaiting) {
+                    complete();
+                }
+            });
+
+            if (iterations) {
+                setImmediate(go);
+                iterations -= 1;
+            }
+
+        }());
+    }
+
+    // From: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+
     t.test('original', function (t) {
 
         t.plan(4);
@@ -208,7 +235,6 @@ test('dustjs-onload-context', function (t) {
             switch (name) {
                 case 'index':
                     setImmediate(cb.bind(null, null, 'Hello, {>"partial"/}!'));
-                    undo();
                     break;
                 case 'partial':
                     setImmediate(cb.bind(null, null, '{name}'));
@@ -220,6 +246,7 @@ test('dustjs-onload-context', function (t) {
             t.error(err);
             t.equal(data, 'Hello, world!');
             t.equal(dust.load.name, 'cabbage');
+            undo();
         });
 
         dust.render('index', { name: 'world'}, function (err, data) {
@@ -228,12 +255,56 @@ test('dustjs-onload-context', function (t) {
             t.equal(dust.load.name, 'cabbage');
 
             dust.cache = {};
+            undo();
 
             setImmediate(function () {
                 t.equal(dust.load.name, '');
                 t.end();
             });
         });
+
+    });
+
+
+    t.test('race conditions', function (t) {
+
+        dust.onLoad = function (name, context, cb) {
+            var template;
+
+            switch (name) {
+                case 'index':
+                    template = 'Hello, {>"partial1"/}!';
+                    break;
+                case 'partial1':
+                    template = '<em>{>"partial2"/}</em>';
+                    break;
+                case 'partial2':
+                    template = '{name}';
+                    break;
+                default:
+                    template = '';
+            }
+
+            // Introduce "entropy"-like variance.
+            setTimeout(cb.bind(null, null, template), getRandomInt(0, 500));
+        };
+
+        function exec(done) {
+            var undo = contextify();
+            dust.render('index', { name: 'world' }, function (err, data) {
+                t.error(err, 'no error');
+                t.equal(data, 'Hello, <em>world</em>!', 'rendered correctly');
+                undo();
+                done();
+            });
+        }
+
+        function complete() {
+            t.equal(dust.load.name, '');
+            t.end();
+        }
+
+        run(1000, exec, complete);
 
     });
 
