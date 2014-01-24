@@ -26,6 +26,9 @@ To enable support for the `context` argument, simply require and invoke the expo
 dustjs) and assign a function which accepts three arguments to the `onLoad` dust property. Functions assigned to `onLoad`
 which only accept 2 arguments are considered a noop and are treated the same as the original dust `onLoad` API.
 
+To revert dust back to its original functional, this module returns a function once invoked. Invoking this function will
+revert dust and `onLoad` to their original behavior.
+
 ```
-NDOE: The `dustjs-linkedin` module is required, but is not an explicit dependency of this module.
+NOTE: The `dustjs-linkedin` module is required, but is not an explicit dependency of this module.
 ```
