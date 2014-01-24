@@ -267,6 +267,7 @@ test('dustjs-onload-context', function (t) {
 
 
     t.test('race conditions', function (t) {
+        var undo = contextify();
 
         dust.onLoad = function (name, context, cb) {
             var template;
@@ -300,6 +301,8 @@ test('dustjs-onload-context', function (t) {
         }
 
         function complete() {
+            t.equal(dust.load.name, '');
+            undo(); // ensure subsequent `undo` is noop
             t.equal(dust.load.name, '');
             t.end();
         }
