@@ -1,5 +1,5 @@
-dustjs-onload-context extends dustjs to support `dust.onLoad` callbacks which accept the current rendering context. This
-can be useful when it's necessary to resolve templates based on state in the render context.
+`dustjs-onload-context` extends dustjs to support `dust.onLoad` callbacks which accept the current rendering context as the second
+parameter. This can be useful when it's necessary to resolve templates based on state in the render context.
 
 [![Build Status](https://travis-ci.org/totherik/dustjs-onload-context.png)](https://travis-ci.org/totherik/dustjs-onload-context)
 
