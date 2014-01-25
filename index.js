@@ -105,6 +105,8 @@ module.exports = function contextualize(options) {
         if (!active && orig && dustjs.load !== orig) {
             dustjs.load = orig;
             orig = undefined;
+            return true;
         }
+        return false;
     };
 };

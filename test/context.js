@@ -229,7 +229,7 @@ test('dustjs-onload-context', function (t) {
     t.test('undo', function (t) {
         var undo = contextify();
 
-        t.plan(7);
+        t.plan(9);
 
         dust.onLoad = function (name, context, cb) {
             switch (name) {
@@ -246,7 +246,7 @@ test('dustjs-onload-context', function (t) {
             t.error(err);
             t.equal(data, 'Hello, world!');
             t.equal(dust.load.name, 'cabbage');
-            undo();
+            t.strictEqual(undo(), false);
         });
 
         dust.render('index', { name: 'world'}, function (err, data) {
@@ -255,9 +255,9 @@ test('dustjs-onload-context', function (t) {
             t.equal(dust.load.name, 'cabbage');
 
             dust.cache = {};
-            undo();
 
             setImmediate(function () {
+                t.strictEqual(undo(), true);
                 t.equal(dust.load.name, '');
                 t.end();
             });
@@ -295,14 +295,14 @@ test('dustjs-onload-context', function (t) {
             dust.render('index', { name: 'world' }, function (err, data) {
                 t.error(err, 'no error');
                 t.equal(data, 'Hello, <em>world</em>!', 'rendered correctly');
-                undo();
+                t.equal(typeof undo(), 'boolean');
                 done();
             });
         }
 
         function complete() {
             t.equal(dust.load.name, '');
-            undo(); // ensure subsequent `undo` is noop
+            t.strictEqual(undo(), false); // ensure subsequent `undo` is noop
             t.equal(dust.load.name, '');
             t.end();
         }
