@@ -1,6 +1,7 @@
 `dustjs-onload-context` extends dustjs to support `dust.onLoad` callbacks which accept the current rendering context as the second
 parameter. This can be useful when it's necessary to resolve templates based on state in the render context.
 
+
 [![Build Status](https://travis-ci.org/totherik/dustjs-onload-context.png)](https://travis-ci.org/totherik/dustjs-onload-context)
 
 #### Example
@@ -21,6 +22,9 @@ dust.onLoad = function (name, context, cb) {
 };
 ```
 
+> NOTE: The `dustjs-linkedin` module is required, but is not an explicit dependency of this module.
+
+
 
 #### Usage
 To enable support for the `context` argument, simply require `dustjs-onload-context` and invoke the exported function
@@ -30,10 +34,6 @@ original dust `onLoad` API.
 
 To revert dust back to its original functional, this module returns a function once invoked. Invoking this function will
 revert dust and `onLoad` to their original behavior.
-
-```
-NOTE: The `dustjs-linkedin` module is required, but is not an explicit dependency of this module.
-```
 
 
 #### Options
