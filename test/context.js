@@ -304,11 +304,106 @@ test('dustjs-onload-context', function (t) {
             t.equal(dust.load.name, '');
             t.strictEqual(undo(), false); // ensure subsequent `undo` is noop
             t.equal(dust.load.name, '');
+
+            dust.cache = {};
+
             t.end();
         }
 
         run(1000, exec, complete);
 
+    });
+
+
+    t.test('caching enabled', function (t) {
+        var undo = contextify();
+
+        t.plan(8);
+
+        dust.onLoad = function (name, context, cb) {
+            var template;
+
+            switch (name) {
+                case 'index':
+                    template = 'Aloha, {>"partial"/}!';
+                    break;
+                case 'partial':
+                    template = '{name}';
+                    break;
+                default:
+                    template = '';
+            }
+
+            setImmediate(cb.bind(null, null, template));
+        };
+
+        dust.render('index', { name: 'world' }, function (err, data) {
+            t.error(err);
+            t.equal(data, 'Aloha, world!');
+
+            t.equal(typeof dust.cache['index'], 'function');
+            t.equal(typeof dust.cache['partial'], 'function');
+            t.equal(Object.keys(dust.cache).length, 2);
+
+            // Ensure templates exist in cache across completion.
+            setImmediate(function () {
+                t.equal(typeof dust.cache['index'], 'function');
+                t.equal(typeof dust.cache['partial'], 'function');
+                t.equal(Object.keys(dust.cache).length, 2);
+
+                dust.cache = {};
+                undo();
+
+                t.end();
+            });
+        });
+    });
+
+
+    t.test('caching disabled', function (t) {
+        var undo = contextify({ cache: false });
+
+        t.plan(8);
+
+        dust.onLoad = function (name, context, cb) {
+            var template;
+
+            switch (name) {
+                case 'index':
+                    template = 'Bonjour, {>"partial"/}';
+                    break;
+                case 'partial':
+                    template = '{name}!';
+                    break;
+                default:
+                    template = '';
+            }
+
+            setImmediate(cb.bind(null, null, template));
+        };
+
+        dust.render('index', { name: 'world' }, function (err, data) {
+            t.error(err);
+            t.equal(data, 'Bonjour, world!');
+
+            // At this point, at least one template still exists in cache
+            // since removal happens after this callback is invoked by dust
+            // internally.
+            t.equal(typeof dust.cache['index'], 'undefined');
+            t.equal(typeof dust.cache['partial'], 'function');
+            t.equal(Object.keys(dust.cache).length, 1);
+
+            setImmediate(function () {
+                t.equal(dust.cache['index'], undefined);
+                t.equal(dust.cache['partial'], undefined);
+                t.equal(Object.keys(dust.cache).length, 0);
+
+                dust.cache = {};
+                undo();
+
+                t.end();
+            });
+        });
     });
 
 });

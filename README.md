@@ -34,3 +34,21 @@ revert dust and `onLoad` to their original behavior.
 ```
 NOTE: The `dustjs-linkedin` module is required, but is not an explicit dependency of this module.
 ```
+
+
+#### Options
+- `cache` (*Boolish*, optional) Defaults to `true`. This flag indicates whether templates resolve by the defined `onLoad`
+should be placed into the internal dust cache or not.
+
+
+
+#### Tests
+```bash
+$ npm test
+```
+
+
+#### Coverage
+````bash
+$ npm run-script cover && open coverage/lcov-report/index.html
+```
