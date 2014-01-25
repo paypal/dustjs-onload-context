@@ -37,8 +37,8 @@ NOTE: The `dustjs-linkedin` module is required, but is not an explicit dependenc
 
 
 #### Options
-- `cache` (*Boolish*, optional) Defaults to `true`. This flag indicates whether templates resolve by the defined `onLoad`
-should be placed into the internal dust cache or not.
+- `cache` (*Boolish*, optional) Defaults to `true`. This flag indicates whether or not templates resolved by the defined `onLoad`
+should be placed into the internal dust cache.
 
 
 
