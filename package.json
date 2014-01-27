@@ -1,6 +1,6 @@
 {
   "name": "dustjs-onload-context",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Extend dustjs onLoad to accept rendering context",
   "main": "index.js",
   "directories": {
