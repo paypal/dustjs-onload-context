@@ -16,7 +16,6 @@
     "context",
     "onload"
   ],
-  "repository": "https://github.com/paypal/dustjs-onload-context.git",
   "author": "Erik Toth <ertoth@paypal.com>",
   "licenses": [
     {
@@ -33,5 +32,13 @@
     "jshint": "~2.4.2",
     "istanbul": "~0.2.4",
     "dustjs-linkedin": "~2.3.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/paypal/dustjs-onload-context.git"
+  },
+  "bugs": {
+    "url": "https://github.com/paypal/dustjs-onload-context/issues"
+  },
+  "homepage": "https://github.com/paypal/dustjs-onload-context"
 }
