@@ -2,7 +2,7 @@
 parameter. This can be useful when it's necessary to resolve templates based on state in the render context.
 
 
-[![Build Status](https://travis-ci.org/totherik/dustjs-onload-context.png)](https://travis-ci.org/totherik/dustjs-onload-context)
+[![Build Status](https://travis-ci.org/paypal/dustjs-onload-context.png)](https://travis-ci.org/paypal/dustjs-onload-context)
 
 #### Example
 ```javascript
