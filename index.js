@@ -21,8 +21,40 @@ var dustjs = require('dustjs-linkedin');
 var RESERVED = '☃';
 var active = 0;
 var orig;
+var slice = Function.prototype.call.bind(Array.prototype.slice);
 
-function patch(load, options) {
+
+/**
+ * Inspired by http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony
+ * @param fn the method which it's not know if it's sync or async
+ * @param cb the callback to be invoked upon resolution of fn
+ */
+function async(fn, cb) {
+    var sync;
+
+    function wrap(fn) {
+        return function wrapper() {
+            var args, complete;
+
+            args = slice(arguments);
+            args.unshift(null);
+
+            complete = Function.prototype.bind.apply(fn, args);
+            if (sync) {
+                setImmediate(complete);
+                return;
+            }
+            complete();
+        }
+    }
+
+    sync = true;
+    fn(wrap(cb));
+    sync = false;
+}
+
+
+function patch(load) {
     return function cabbage(name, chunk, context) {
         var view, cached;
 
@@ -46,36 +78,32 @@ function patch(load, options) {
                     delete this[view];
                     active += 1;
 
-                    return function faux(chunks, context) {
+                    return function fauxTemplate(chunks, context) {
 
                         function onchunk(chunk) {
-                            var args;
 
                             function onloaded(err, src) {
+                                var template;
+
                                 active -= 1;
 
                                 if (err) {
                                     chunk.setError(err);
+                                    delete self[name];
                                     return;
                                 }
 
-                                if (!self[name]) {
+                                template = self[name];
+                                if (!template) {
                                     dustjs.loadSource(dustjs.compile(src, name));
+                                    template = self[name];
                                 }
 
-                                self[name](chunk, context).end();
-
-                                if (!options.cache) {
-                                    delete self[name];
-                                }
+                                delete self[name];
+                                template(chunk, context).end();
                             }
 
-                            args = [name, onloaded];
-                            if (dustjs.onLoad.length === 3) {
-                                args.splice(1, 0, context);
-                            }
-
-                            dustjs.onLoad.apply(null, args);
+                            async(dustjs.onLoad.bind(null, name, context), onloaded);
                         }
 
                         return chunks.map(onchunk);
@@ -92,13 +120,10 @@ function patch(load, options) {
 
 
 
-module.exports = function contextualize(options) {
-
-    options = options || { cache: true };
-
+module.exports = function contextualize() {
     if (!orig) {
         orig = dustjs.load;
-        dustjs.load = patch(orig, options);
+        dustjs.load = patch(orig);
     }
 
     return function undo() {
