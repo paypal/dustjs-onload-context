@@ -32,24 +32,22 @@ var slice = Function.prototype.call.bind(Array.prototype.slice);
 function async(fn, cb) {
     var sync;
 
-    function wrap(fn) {
-        return function wrapper() {
-            var args, complete;
+    function wrapper() {
+        var args, complete;
 
-            args = slice(arguments);
-            args.unshift(null);
+        args = slice(arguments);
+        args.unshift(null);
 
-            complete = Function.prototype.bind.apply(fn, args);
-            if (sync) {
-                setImmediate(complete);
-                return;
-            }
-            complete();
-        };
+        complete = Function.prototype.bind.apply(cb, args);
+        if (sync) {
+            setImmediate(complete);
+            return;
+        }
+        complete();
     }
 
     sync = true;
-    fn(wrap(cb));
+    fn(wrapper);
     sync = false;
 }
 
