@@ -45,7 +45,7 @@ function async(fn, cb) {
                 return;
             }
             complete();
-        }
+        };
     }
 
     sync = true;
