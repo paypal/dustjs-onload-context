@@ -15,7 +15,7 @@
  \*───────────────────────────────────────────────────────────────────────────*/
 'use strict';
 
-var dustjs = require('dustjs-linkedin');
+var dust = require('dustjs-linkedin');
 
 
 var RESERVED = '☃';
@@ -52,18 +52,19 @@ function async(fn, cb) {
 }
 
 
-function patch(load) {
+function patch(load, onload) {
+
     return function cabbage(name, chunk, context) {
         var view, cached;
 
         view = name;
-        cached = !!dustjs.cache[view];
+        cached = !!dust.cache[view];
 
         if (!cached) {
 
             view = RESERVED;
 
-            Object.defineProperty(dustjs.cache, view, {
+            Object.defineProperty(dust.cache, view, {
 
                 configurable: true,
 
@@ -93,7 +94,7 @@ function patch(load) {
 
                                 template = self[name];
                                 if (!template) {
-                                    dustjs.loadSource(dustjs.compile(src, name));
+                                    dust.loadSource(dust.compile(src, name));
                                     template = self[name];
                                 }
 
@@ -101,7 +102,7 @@ function patch(load) {
                                 template(chunk, context).end();
                             }
 
-                            async(dustjs.onLoad.bind(null, name, context), onloaded);
+                            async(onload.bind(null, name, context), onloaded);
                         }
 
                         return chunks.map(onchunk);
@@ -117,16 +118,33 @@ function patch(load) {
 }
 
 
+/**
+ * A default wrapper for intercepting calls to `dust.onLoad`
+ * @param name
+ * @param context
+ * @param cb
+ */
+function noop(name, context, cb) {
+    // Assigning onLoad to a variable named noop
+    // will not work because we have no control
+    // over when dust.onLoad is assigned, thus
+    // we need to reference it at runtime.
+    dust.onLoad.apply(null, arguments);
+}
 
-module.exports = function contextualize() {
+
+
+module.exports = function contextualize(options) {
+    options = options || {};
+
     if (!orig) {
-        orig = dustjs.load;
-        dustjs.load = patch(orig);
+        orig = dust.load;
+        dust.load = patch(orig, options.onLoad || noop);
     }
 
     return function undo() {
-        if (!active && orig && dustjs.load !== orig) {
-            dustjs.load = orig;
+        if (!active && orig && dust.load !== orig) {
+            dust.load = orig;
             orig = undefined;
             return true;
         }

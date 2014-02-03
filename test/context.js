@@ -221,7 +221,7 @@ test('dustjs-onload-context', function (t) {
     });
 
     t.test('caching', function (t) {
-        var undo = contextify({ cache: false });
+        var undo = contextify();
 
         t.plan(6);
 
@@ -249,6 +249,51 @@ test('dustjs-onload-context', function (t) {
             // Cache should be empty
             t.equal(dust.cache['index'], undefined);
             t.equal(dust.cache['partial'], undefined);
+            t.equal(Object.keys(dust.cache).length, 0);
+            t.strictEqual(undo(), true);
+            t.end();
+        });
+    });
+
+
+    t.test('alternate onLoad', function (t) {
+        var undo;
+
+        t.plan(12);
+
+        // wrapper that delegates to default onLoad
+        function onLoadWrapper(name, context, cb) {
+            t.equal(typeof name, 'string');
+            t.equal(typeof context, 'object');
+            t.equal(typeof cb, 'function');
+            dust.onLoad(name + '_test', context, cb);
+        }
+
+        dust.onLoad = function (name, context, cb) {
+            var template;
+
+            switch (name) {
+                case 'index_test':
+                    template = 'Hello, {>"partial"/}';
+                    break;
+                case 'partial_test':
+                    template = '{name}!';
+                    break;
+                default:
+                    template = '';
+            }
+
+            setImmediate(cb.bind(null, null, template));
+        };
+
+        undo = contextify({ onLoad: onLoadWrapper });
+        dust.render('index', { name: 'world' }, function (err, data) {
+            t.error(err);
+            t.equal(data, 'Hello, world!');
+
+            // Cache should be empty
+            t.equal(dust.cache['index_test'], undefined);
+            t.equal(dust.cache['partial_test'], undefined);
             t.equal(Object.keys(dust.cache).length, 0);
             t.strictEqual(undo(), true);
             t.end();

@@ -37,8 +37,14 @@ revert dust and `onLoad` to their original behavior.
 
 ```javascript
 var contextify = require('dustjs-onload-context');
-contextify();
+contextify([options]); // See below for supported options
 ```
+
+
+#### Options
+- `onLoad` (*Function*, optional) Provides an alternate `onLoad` implementation to use instead of `dust.onLoad`. This could
+be useful for scenarios in which one wants to intercept calls to the default `dust.onLoad` behavior, modify context and
+delegate to the default `onLoad` defined elsewhere in the application.
 
 
 #### Tests
