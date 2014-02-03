@@ -2,7 +2,7 @@
 parameter. This can be useful when it's necessary to resolve templates based on state in the render context.
 
 
-[![Build Status](https://travis-ci.org/totherik/dustjs-onload-context.png)](https://travis-ci.org/totherik/dustjs-onload-context)
+[![Build Status](https://travis-ci.org/paypal/dustjs-onload-context.png)](https://travis-ci.org/paypal/dustjs-onload-context)
 
 #### Example
 ```javascript
@@ -37,13 +37,8 @@ revert dust and `onLoad` to their original behavior.
 
 ```javascript
 var contextify = require('dustjs-onload-context');
-contextify([options]); // See below for supported options
+contextify();
 ```
-
-#### Options
-- `cache` (*Boolish*, optional) Defaults to `true`. This flag indicates whether or not templates resolved by the defined `onLoad`
-should be placed into the internal dust cache.
-
 
 
 #### Tests

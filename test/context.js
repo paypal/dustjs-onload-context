@@ -204,7 +204,7 @@ test('dustjs-onload-context', function (t) {
                 t.error(err, 'no error');
                 t.equal(data, 'Hello, <em>world</em>!', 'rendered correctly');
                 t.equal(typeof undo(), 'boolean');
-                done();
+                setTimeout(done, getRandomInt(0, 500));
             });
         }
 
@@ -246,9 +246,7 @@ test('dustjs-onload-context', function (t) {
             t.error(err);
             t.equal(data, 'Bonjour, world!');
 
-            // At this point, at least one template still exists in cache
-            // since removal happens after this callback is invoked by dust
-            // internally.
+            // Cache should be empty
             t.equal(dust.cache['index'], undefined);
             t.equal(dust.cache['partial'], undefined);
             t.equal(Object.keys(dust.cache).length, 0);
