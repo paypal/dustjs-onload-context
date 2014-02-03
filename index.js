@@ -57,7 +57,8 @@ function patch(load, onload) {
     return function cabbage(name, chunk, context) {
 
         if (dust.cache.hasOwnProperty(name)) {
-            // Using this module means no internal caching is supported.
+            // Using this module means no internal caching is supported
+            // so ensure nothing exists for this template.
             delete dust.cache[name];
         }
 
@@ -78,6 +79,17 @@ function patch(load, onload) {
 
                     function onchunk(chunk) {
 
+                        // Used when `dust.onLoad` result is arbitrary
+                        // renderer or created using compileFn
+                        function onrendered(err, data) {
+                            if (err) {
+                                chunk.setError(err);
+                                return;
+                            }
+                            chunk.write(data).end();
+                        }
+
+                        // Continuation callback passed to dustjs.onLoad
                         function onloaded(err, src) {
                             var template;
 
@@ -89,13 +101,16 @@ function patch(load, onload) {
                                 return;
                             }
 
-                            template = cache[name];
-                            if (!template) {
-                                dust.loadSource(dust.compile(src, name));
-                                template = cache[name];
+                            template = cache[name] || ((typeof src === 'function') ? src : dust.loadSource(dust.compile(src, name)));
+                            delete cache[name];
+
+                            // Handle arbitrary functions or functions created via `dust.compileFn`
+                            if (!template.name || !template.name.match(/^body_/)) {
+                                template(context, onrendered);
+                                return;
                             }
 
-                            delete cache[name];
+                            // Templates stored in cache or compiled via `dust.compile`
                             template(chunk, context).end();
                         }
 
