@@ -55,65 +55,60 @@ function async(fn, cb) {
 function patch(load, onload) {
 
     return function cabbage(name, chunk, context) {
-        var view, cached;
 
-        view = name;
-        cached = !!dust.cache[view];
-
-        if (!cached) {
-
-            view = RESERVED;
-
-            Object.defineProperty(dust.cache, view, {
-
-                configurable: true,
-
-                get: function () {
-                    var self;
-
-                    // Remove the getter immediately (must delete as it's a
-                    // getter. setting it to undefined will fail.)
-                    self = this;
-                    delete this[view];
-                    active += 1;
-
-                    return function fauxTemplate(chunks, context) {
-
-                        function onchunk(chunk) {
-
-                            function onloaded(err, src) {
-                                var template;
-
-                                active -= 1;
-
-                                if (err) {
-                                    chunk.setError(err);
-                                    delete self[name];
-                                    return;
-                                }
-
-                                template = self[name];
-                                if (!template) {
-                                    dust.loadSource(dust.compile(src, name));
-                                    template = self[name];
-                                }
-
-                                delete self[name];
-                                template(chunk, context).end();
-                            }
-
-                            async(onload.bind(null, name, context), onloaded);
-                        }
-
-                        return chunks.map(onchunk);
-                    };
-                }
-
-            });
-
+        if (dust.cache.hasOwnProperty(name)) {
+            // Using this module means no internal caching is supported.
+            delete dust.cache[name];
         }
 
-        return load(view, chunk, context);
+        Object.defineProperty(dust.cache, RESERVED, {
+
+            configurable: true,
+
+            get: function () {
+                var cache;
+
+                // Remove the getter immediately (must delete as it's a
+                // getter. setting it to undefined will fail.)
+                cache = this;
+                delete this[RESERVED];
+                active += 1;
+
+                return function fauxTemplate(chunks, context) {
+
+                    function onchunk(chunk) {
+
+                        function onloaded(err, src) {
+                            var template;
+
+                            active -= 1;
+
+                            if (err) {
+                                chunk.setError(err);
+                                delete cache[name];
+                                return;
+                            }
+
+                            template = cache[name];
+                            if (!template) {
+                                dust.loadSource(dust.compile(src, name));
+                                template = cache[name];
+                            }
+
+                            delete cache[name];
+                            template(chunk, context).end();
+                        }
+
+                        async(onload.bind(null, name, context), onloaded);
+                    }
+
+                    return chunks.map(onchunk);
+                };
+            }
+
+        });
+
+        return load(RESERVED, chunk, context);
     };
 }
 

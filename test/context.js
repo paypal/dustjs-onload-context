@@ -123,19 +123,21 @@ test('dustjs-onload-context', function (t) {
     t.test('primed template', function (t) {
         var undo = contextify();
 
-        t.plan(2);
+        t.plan(5);
 
         dust.onLoad = function (name, context, cb) {
-            cb(new Error('Should not be called'));
+            t.equal(name, 'index');
+            t.equal(typeof context, 'object');
+            t.equal(typeof cb, 'function');
+            cb(null, 'Hello, {name}!');
         };
 
-        // XXX: This template will not be automatically removed
+        // This should have no effect as cache is completely ignored.
         dust.loadSource(dust.compile('Hello, {name}!', 'index'));
         dust.render('index', { name: 'world' }, function (err, data) {
             t.error(err);
             t.equal(data, 'Hello, world!');
 
-            dust.cache = {};
             undo();
 
             t.end();
