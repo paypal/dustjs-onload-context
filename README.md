@@ -37,13 +37,8 @@ revert dust and `onLoad` to their original behavior.
 
 ```javascript
 var contextify = require('dustjs-onload-context');
-contextify([options]); // See below for supported options
+contextify();
 ```
-
-#### Options
-- `cache` (*Boolish*, optional) Defaults to `true`. This flag indicates whether or not templates resolved by the defined `onLoad`
-should be placed into the internal dust cache.
-
 
 
 #### Tests
