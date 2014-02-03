@@ -93,6 +93,100 @@ test('dustjs-onload-context', function (t) {
     });
 
 
+    t.test('non-cached fn on load', function (t) {
+        var undo = contextify();
+
+        t.plan(9);
+
+        dust.onLoad = function (name, context, cb) {
+            t.equals(name, 'index');
+            t.equals(typeof context, 'object');
+            t.equals(context.get('name'), 'world');
+            t.equals(typeof cb, 'function');
+
+            var template = dust.loadSource(dust.compile('Hello, {name}!', 'index'));
+            delete dust.cache['index'];
+            setImmediate(cb.bind(null, null, template));
+        };
+
+        dust.render('index', { name: 'world' }, function (err, data) {
+            t.error(err);
+            t.equal(data, 'Hello, world!');
+            t.equal(dust.cache.index, undefined);
+            t.equal(dust.load.name, 'cabbage');
+
+            undo();
+
+            t.equal(dust.load.name, '');
+            setImmediate(t.end.bind(t));
+        });
+
+    });
+
+
+    t.test('compileFn templates', function (t) {
+        var undo;
+
+        t.plan(6);
+
+        dust.onLoad = function (name, context, cb) {
+            var template;
+
+            switch (name) {
+                case 'index':
+                    template = 'Hello, {>"partial"/}';
+                    break;
+                case 'partial':
+                    template = '{name}!';
+                    break;
+                default:
+                    template = '';
+            }
+
+            setImmediate(cb.bind(null, null, dust.compileFn(template)));
+        };
+
+        undo = contextify();
+        dust.render('index', { name: 'world' }, function (err, data) {
+            t.error(err);
+            t.equal(data, 'Hello, world!');
+
+            // Cache should be empty
+            t.equal(dust.cache['index'], undefined);
+            t.equal(dust.cache['partial'], undefined);
+            t.equal(Object.keys(dust.cache).length, 0);
+            t.strictEqual(undo(), true);
+            t.end();
+        });
+    });
+
+
+    t.test('compileFn templates with error', function (t) {
+        var undo;
+
+        t.plan(4);
+
+        dust.onLoad = function (name, context, cb) {
+            function fauxCompiled(context, cb) {
+                cb(new Error('Failure'));
+            }
+
+            setImmediate(cb.bind(null, null, fauxCompiled));
+        };
+
+        undo = contextify();
+        dust.render('index', { name: 'world' }, function (err, data) {
+            t.ok(err);
+            t.notOk(data);
+
+            // Cache should be empty
+            t.equal(Object.keys(dust.cache).length, 0);
+            t.strictEqual(undo(), true);
+            t.end();
+        });
+    });
+
+
     t.test('error', function (t) {
         var undo = contextify();
 
