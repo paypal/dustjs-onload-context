@@ -295,6 +295,7 @@ test('dustjs-onload-context', function (t) {
         };
 
         function exec(done) {
+            // Was already patched so *should* be a noop.
             var undo = contextify();
             dust.render('index', { name: 'world' }, function (err, data) {
                 t.error(err, 'no error');
@@ -305,8 +306,8 @@ test('dustjs-onload-context', function (t) {
         }
 
         function complete() {
-            t.equal(dust.load.name, '');
-            t.strictEqual(undo(), false); // ensure subsequent `undo` is noop
+            t.equal(dust.load.name, 'cabbage');
+            t.strictEqual(undo(), true); // ensure subsequent `undo` is noop
             t.equal(dust.load.name, '');
 
             setImmediate(t.end.bind(t));
