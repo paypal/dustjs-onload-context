@@ -36,7 +36,7 @@ test('dustjs-onload-context', function (t) {
 
 
     t.test('with context', function (t) {
-        var undo = contextify();
+        var undo = contextify(dust);
 
         t.plan(9);
 
@@ -64,7 +64,7 @@ test('dustjs-onload-context', function (t) {
 
 
     t.test('prime cache on load', function (t) {
-        var undo = contextify();
+        var undo = contextify(dust);
 
         t.plan(9);
 
@@ -94,7 +94,7 @@ test('dustjs-onload-context', function (t) {
 
 
     t.test('non-cached fn on load', function (t) {
-        var undo = contextify();
+        var undo = contextify(dust);
 
         t.plan(9);
 
@@ -146,7 +146,7 @@ test('dustjs-onload-context', function (t) {
             setImmediate(cb.bind(null, null, dust.compileFn(template)));
         };
 
-        undo = contextify();
+        undo = contextify(dust);
         dust.render('index', { name: 'world' }, function (err, data) {
             t.error(err);
             t.equal(data, 'Hello, world!');
@@ -174,7 +174,7 @@ test('dustjs-onload-context', function (t) {
             setImmediate(cb.bind(null, null, fauxCompiled));
         };
 
-        undo = contextify();
+        undo = contextify(dust);
         dust.render('index', { name: 'world' }, function (err, data) {
             t.ok(err);
             t.notOk(data);
@@ -188,7 +188,7 @@ test('dustjs-onload-context', function (t) {
 
 
     t.test('error', function (t) {
-        var undo = contextify();
+        var undo = contextify(dust);
 
         t.plan(7);
 
@@ -215,7 +215,7 @@ test('dustjs-onload-context', function (t) {
 
 
     t.test('primed template', function (t) {
-        var undo = contextify();
+        var undo = contextify(dust);
 
         t.plan(5);
 
@@ -241,7 +241,7 @@ test('dustjs-onload-context', function (t) {
 
 
     t.test('undo', function (t) {
-        var undo = contextify();
+        var undo = contextify(dust);
 
         t.plan(5);
 
@@ -272,7 +272,7 @@ test('dustjs-onload-context', function (t) {
 
 
     t.test('race conditions', function (t) {
-        var undo = contextify();
+        var undo = contextify(dust);
 
         dust.onLoad = function (name, context, cb) {
             var template;
@@ -296,7 +296,7 @@ test('dustjs-onload-context', function (t) {
 
         function exec(done) {
             // Was already patched so *should* be a noop.
-            var undo = contextify();
+            var undo = contextify(dust);
             dust.render('index', { name: 'world' }, function (err, data) {
                 t.error(err, 'no error');
                 t.equal(data, 'Hello, <em>world</em>!', 'rendered correctly');
@@ -318,7 +318,7 @@ test('dustjs-onload-context', function (t) {
     });
 
     t.test('caching', function (t) {
-        var undo = contextify();
+        var undo = contextify(dust);
 
         t.plan(6);
 
@@ -383,7 +383,7 @@ test('dustjs-onload-context', function (t) {
             setImmediate(cb.bind(null, null, template));
         };
 
-        undo = contextify({ onLoad: onLoadWrapper });
+        undo = contextify(dust, onLoadWrapper);
         dust.render('index', { name: 'world' }, function (err, data) {
             t.error(err);
             t.equal(data, 'Hello, world!');

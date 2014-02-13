@@ -16,7 +16,6 @@
 'use strict';
 
 var RESERVED = '☃';
-var active = 0;
 var slice = Function.prototype.call.bind(Array.prototype.slice);
 
 
@@ -142,20 +141,16 @@ function noop(dust) {
         // over when dust.onLoad is assigned, thus
         // we need to reference it at runtime.
         dust.onLoad.apply(null, arguments);
-    }
+    };
 }
 
 
 
-module.exports = function contextualize(options) {
-    var dust, onload, orig;
-
-    options = options || {};
-    dust = options.dust || require('dustjs-linkedin');
-    onload = options.onLoad || noop(dust);
+module.exports = function contextualize(dust, onload) {
+    var orig;
 
     if (dust.load.name !== 'cabbage') {
-        orig = patch(dust, onload);
+        orig = patch(dust, onload || noop(dust));
     }
 
     return function undo() {
