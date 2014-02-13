@@ -42,9 +42,11 @@ contextify(dust, [onload]); // See below for supported options
 
 
 #### Options
+* `dust` (*Object*) the dustjs module to be decorated
+
 * `onload` (*Function*, optional) Provides an alternate `onLoad` implementation to use instead of `dust.onLoad`. This could
-be useful for scenarios in which one wants to intercept calls to the default `dust.onLoad` behavior, modify context and
-delegate to the default `onLoad` defined elsewhere in the application.
+be useful for scenarios in which one wants to intercept calls to the default onLoad behavior, modify context and
+delegate to the default onLoad defined elsewhere in the application.
 
 
 #### Tests
