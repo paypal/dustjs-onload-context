@@ -15,12 +15,7 @@
  \*───────────────────────────────────────────────────────────────────────────*/
 'use strict';
 
-var dust = require('dustjs-linkedin');
-
-
 var RESERVED = '☃';
-var active = 0;
-var orig;
 var slice = Function.prototype.call.bind(Array.prototype.slice);
 
 
@@ -52,9 +47,10 @@ function async(fn, cb) {
 }
 
 
-function patch(load, onload) {
+function patch(dust, onload) {
+    var load;
 
-    return function cabbage(name, chunk, context) {
+    function cabbage(name, chunk, context) {
 
         if (dust.cache.hasOwnProperty(name)) {
             // Using this module means no internal caching is supported
@@ -73,7 +69,7 @@ function patch(load, onload) {
                 // getter. setting it to undefined will fail.)
                 cache = this;
                 delete this[RESERVED];
-                active += 1;
+                cabbage.active += 1;
 
                 return function fauxTemplate(chunks, context) {
 
@@ -93,7 +89,7 @@ function patch(load, onload) {
                         function onloaded(err, src) {
                             var template;
 
-                            active -= 1;
+                            cabbage.active -= 1;
 
                             if (err) {
                                 chunk.setError(err);
@@ -124,36 +120,41 @@ function patch(load, onload) {
         });
 
         return load(RESERVED, chunk, context);
-    };
+    }
+
+
+    load = dust.load;
+    cabbage.active = 0;
+    dust.load = cabbage;
+    return load;
 }
 
 
 /**
  * A default wrapper for intercepting calls to `dust.onLoad`
- * @param name
- * @param context
- * @param cb
+ * @param dust
  */
-function noop(name, context, cb) {
-    // Assigning onLoad to a variable named noop
-    // will not work because we have no control
-    // over when dust.onLoad is assigned, thus
-    // we need to reference it at runtime.
-    dust.onLoad.apply(null, arguments);
+function noop(dust) {
+    return function (name, context, cb) {
+        // Assigning onLoad to a variable named noop
+        // will not work because we have no control
+        // over when dust.onLoad is assigned, thus
+        // we need to reference it at runtime.
+        dust.onLoad.apply(null, arguments);
+    };
 }
 
 
 
-module.exports = function contextualize(options) {
-    options = options || {};
+module.exports = function contextualize(dust, onload) {
+    var orig;
 
-    if (!orig) {
-        orig = dust.load;
-        dust.load = patch(orig, options.onLoad || noop);
+    if (dust.load.name !== 'cabbage') {
+        orig = patch(dust, onload || noop(dust));
     }
 
     return function undo() {
-        if (!active && orig && dust.load !== orig) {
+        if (orig && dust.load !== orig && dust.load.active === 0) {
             dust.load = orig;
             orig = undefined;
             return true;
